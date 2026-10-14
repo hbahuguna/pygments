@@ -10,6 +10,7 @@ from io import StringIO
 
 from pygments.lexers import PythonLexer
 from pygments.formatters import IRCFormatter
+from pygments.token import Token
 
 tokensource = list(PythonLexer().get_tokens("lambda x: 123"))
 newlinetokensource = list(PythonLexer().get_tokens("from \\\n\\\n    os import  path\n"))
@@ -28,3 +29,13 @@ def test_linecount_output():
 
     expected_out = '0001: \x0302from\x03\x0315 \\\x03\n0002: \x0315\\\x03\n0003: \x0315    \x03\x1d\x0310os\x03\x1d\x0315 \x03\x0302import\x03  path\n0004: '
     assert expected_out == houtfile.getvalue()
+
+def test_unknown_color_is_ignored():
+    # A custom colorscheme may name colors that are not part of the built-in
+    # IRC_COLOR_MAP. Such tokens must be emitted without a color code instead
+    # of raising KeyError.
+    hfmt = IRCFormatter(colorscheme={Token: ('notacolor', 'alsonotacolor')})
+    houtfile = StringIO()
+    hfmt.format([(Token, 'spam')], houtfile)
+
+    assert 'spam' == houtfile.getvalue()
