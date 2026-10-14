@@ -88,8 +88,10 @@ def ircformat(color, text):
     # underline (\x1F) not supported
     # backgrounds (\x03FF,BB) not supported
     if len(color) > 0: # actual color - may have issues with ircformat("red", "blah")+"10" type stuff
-        add += '\x03' + str(IRC_COLOR_MAP[color]).zfill(2)
-        sub = '\x03' + sub
+        color_code = IRC_COLOR_MAP.get(color)
+        if color_code is not None:
+            add += '\x03' + str(color_code).zfill(2)
+            sub = '\x03' + sub
     return add + text + sub
 
 
